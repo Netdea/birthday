@@ -1,32 +1,23 @@
-from .engine import Engine
-import weakref
 
-_activeEngines = weakref.WeakValueDictionary()
+'''
+Utility functions to help with Python 2/3 compatibility
+'''
+from .. import six
 
-def init(driverName=None, debug=False):
+def toUtf8(value):
     '''
-    Constructs a new TTS engine instance or reuses the existing instance for
-    the driver name.
-
-    @param driverName: Name of the platform specific driver to use. If
-        None, selects the default driver for the operating system.
-    @type: str
-    @param debug: Debugging output enabled or not
-    @type debug: bool
-    @return: Engine instance
-    @rtype: L{engine.Engine}
+    Takes in a value and converts it to a text (unicode) type.  Then decodes that
+    type to a byte array encoded in utf-8.  In 2.X the resulting object will be a
+    str and in 3.X the resulting object will be bytes.  In both 2.X and 3.X any
+    object can be passed in and the object's __str__ will be used (or __repr__ if
+    __str__ is not defined) if the object is not already a text type.
     '''
-    try:
-        eng = _activeEngines[driverName]
-    except KeyError:
-        eng = Engine(driverName, debug)
-        _activeEngines[driverName] = eng
-    return eng
+    return six.text_type(value).encode('utf-8')
 
-
-def speak(text):
-    engine = init()
-    engine.say(text)
-    engine.runAndWait()
-
-
+def fromUtf8(value):
+    '''
+    Takes in a byte array encoded as utf-8 and returns a text (unicode) type.  In
+    2.X we expect a str type and return a unicde type.  In 3.X we expect a bytes
+    type and return a str type.
+    '''
+    return value.decode('utf-8')
